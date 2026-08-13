@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>サービス担当者会議の要点｜音声入力＋AI要約</title>
+<style>
+:root{
+  --brand:#0099CC; --brand-dark:#00739B; --brand-pale:#E8F6FB;
+  --ink:#1B2733; --sub:#5B6B7A; --line:#D9E2E8; --bg:#F2F6F8;
+  --rec:#D9480F; --paper:#FFFFFF;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:16px; line-height:1.7; -webkit-text-size-adjust:100%;}
+header{background:var(--brand); color:#fff; padding:14px 16px; position:sticky; top:0; z-index:20; box-shadow:0 2px 8px rgba(0,0,0,.12);}
+header h1{font-size:17px; margin:0; font-weight:700;}
+header p{margin:2px 0 0; font-size:12px; opacity:.9;}
+main{max-width:900px; margin:0 auto; padding:16px 12px 120px;}
+section{background:var(--paper); border:1px solid var(--line); border-radius:10px; margin-bottom:14px; overflow:hidden;}
+.sec-head{display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--brand-pale); border-bottom:1px solid var(--line);}
+.step{flex:none; width:26px; height:26px; border-radius:50%; background:var(--brand); color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center;}
+.sec-head h2{margin:0; font-size:15px; font-weight:700;}
+.sec-body{padding:14px;}
+label{display:block; font-size:13px; color:var(--sub); margin:10px 0 4px; font-weight:600;}
+input[type=text],input[type=date],input[type=time],input[type=number],textarea{
+  width:100%; padding:10px 12px; font-size:16px; font-family:inherit;
+  border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);}
+textarea{line-height:1.7; resize:vertical;}
+input:focus,textarea:focus{outline:2px solid var(--brand); outline-offset:1px; border-color:var(--brand);}
+.row{display:flex; gap:10px; flex-wrap:wrap;}
+.row > div{flex:1 1 160px; min-width:130px;}
+.hint{font-size:12px; color:var(--sub); margin:6px 0 0;}
+button{font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; border-radius:8px; padding:12px 16px; background:var(--brand); color:#fff;}
+button:disabled{background:#B7C4CC; cursor:not-allowed;}
+button.ghost{background:#fff; color:var(--brand-dark); border:1.5px solid var(--brand);}
+button.sub{background:#5B6B7A;}
+button.small{padding:7px 12px; font-size:13px;}
+button:focus-visible{outline:3px solid #FFB300; outline-offset:2px;}
+.btnbar{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+.rec-panel{text-align:center; padding:6px 0 2px;}
+#recBtn{width:190px; height:56px; font-size:17px; border-radius:28px; background:var(--rec); box-shadow:0 3px 0 #A5350B;}
+#recBtn.on{background:#B32D0C; animation:pulse 1.6s infinite;}
+@keyframes pulse{0%{box-shadow:0 3px 0 #A5350B,0 0 0 0 rgba(217,72,15,.45);}70%{box-shadow:0 3px 0 #A5350B,0 0 0 16px rgba(217,72,15,0);}100%{box-shadow:0 3px 0 #A5350B,0 0 0 0 rgba(217,72,15,0);}}
+@media (prefers-reduced-motion:reduce){#recBtn.on{animation:none;}}
+.meter{display:flex; justify-content:center; gap:16px; font-size:13px; color:var(--sub); margin-top:8px;}
+.meter b{font-variant-numeric:tabular-nums; font-size:16px; color:var(--ink);}
+.status{margin:10px 0 0; padding:8px 12px; border-radius:6px; font-size:13px; background:#F4F7F9; border:1px solid var(--line); color:var(--sub);}
+.status.err{background:#FDECE6; border-color:#F3B49A; color:#8A2C08;}
+.status.on{background:#E9F7EF; border-color:#A9DCC0; color:#14522F;}
+#interim{color:#8595A3;}
+#transcript{min-height:200px; font-size:15px;}
+.marker-note{font-size:12px; color:var(--sub); margin-top:8px;}
+.att{display:flex; gap:8px; align-items:center; margin-bottom:8px;}
+.att span{flex:none; width:22px; text-align:right; font-size:13px; color:var(--sub);}
+.att input{flex:1;}
+.att button{flex:none; background:none; color:#B4361A; border:1px solid #E3B7AC; padding:8px 10px; font-size:12px; border-radius:6px; font-weight:400;}
+.preview{background:#fff; border:1px solid var(--line); border-radius:6px; padding:16px;
+  font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:14px; white-space:pre-wrap; line-height:1.9; max-height:420px; overflow:auto;}
+details{border-top:1px solid var(--line); padding:10px 14px; font-size:13px; color:var(--sub); background:#FAFCFD;}
+summary{cursor:pointer; font-weight:700; color:var(--brand-dark);}
+details p{margin:8px 0;}
+.footer-note{font-size:12px; color:var(--sub); text-align:center; margin-top:18px; line-height:1.8;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>サービス担当者会議の要点（第4表）</h1>
+  <p>話した内容をその場で文字にして、様式どおりのWordファイルにします</p>
+</header>
+
+<main>
+
+<!-- ① 基本情報 -->
+<section>
+  <div class="sec-head"><span class="step">1</span><h2>会議の情報を入れる</h2></div>
+  <div class="sec-body">
+    <div class="row">
+      <div>
+        <label for="user">利用者名</label>
+        <input type="text" id="user" placeholder="例）山科太郎">
+      </div>
+      <div>
+        <label for="planner">施設サービス計画作成者（担当者）氏名</label>
+        <input type="text" id="planner" placeholder="例）中村　悟">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="madeDate">作成年月日</label>
+        <input type="date" id="madeDate">
+      </div>
+      <div>
+        <label for="mtDate">開催日</label>
+        <input type="date" id="mtDate">
+      </div>
+    </div>
+
+    <label for="place">開催場所</label>
+    <input type="text" id="place" placeholder="例）本館4階ステーション">
+
+    <div class="row">
+      <div>
+        <label for="start">開催時間（開始）</label>
+        <input type="time" id="start" value="14:30">
+      </div>
+      <div>
+        <label for="end">開催時間（終了）</label>
+        <input type="time" id="end" value="15:00">
+      </div>
+      <div>
+        <label for="times">開催回数</label>
+        <input type="number" id="times" value="1" min="1">
+      </div>
+    </div>
+
+    <label for="mark">右上の表記</label>
+    <input type="text" id="mark" value="長期老健">
+
+    <label>会議出席者（所属または職種と氏名）</label>
+    <div id="attList"></div>
+    <div class="btnbar">
+      <button type="button" class="ghost small" id="addAttBtn">出席者を追加する</button>
+    </div>
+    <p class="hint">本人と家族も出席者に入れてください。所属の欄に「本人」「息子」と書きます。</p>
+  </div>
+</section>
+
+<!-- ② 録音 -->
+<section>
+  <div class="sec-head"><span class="step">2</span><h2>会議中に録音して文字にする</h2></div>
+  <div class="sec-body">
+    <div class="rec-panel">
+      <button id="recBtn" type="button">録音を始める</button>
+      <div class="meter">
+        <span>経過 <b id="elapsed">00:00</b></span>
+        <span>文字数 <b id="charCount">0</b></span>
+      </div>
+    </div>
+
+    <div class="status" id="recStatus">マイクの使用を許可すると始まります。発言者に近い位置に端末を置いてください。</div>
+    <div class="status" id="interimBox" style="display:none;"><span id="interim"></span></div>
+
+    <div class="btnbar">
+      <button type="button" class="ghost" id="markBtn" disabled>ここから話題が変わる</button>
+      <button type="button" class="sub small" id="saveTxtBtn">文字起こしを保存（保険）</button>
+      <button type="button" class="sub small" id="clearBtn">全部消す</button>
+    </div>
+    <p class="marker-note">話題が変わったところで押すと区切り線が入ります。区切っておくと、要約の精度が上がります。</p>
+
+    <label for="transcript">文字起こし（あとから直せます）</label>
+    <textarea id="transcript" rows="10" placeholder="ここに話した内容が入ります。聞き取り間違いは直接直してください。"></textarea>
+  </div>
+</section>
+
+<!-- ③ AI -->
+<section>
+  <div class="sec-head"><span class="step">3</span><h2>AIで4つの欄に振り分ける</h2></div>
+  <div class="sec-body">
+    <label for="gasUrl">要約サーバーのアドレス（GASのウェブアプリURL）</label>
+    <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <p class="hint">議事録ツールと同じGASがそのまま使えます。未設定でも「指示文をコピー」で進められます。</p>
+
+    <div class="btnbar">
+      <button type="button" id="aiBtn">AIで要約する</button>
+      <button type="button" class="ghost" id="copyPromptBtn">指示文をコピー</button>
+    </div>
+    <div class="status" id="aiStatus" style="display:none;"></div>
+
+    <label for="pasteBox">AIの回答を貼り付ける欄（サーバーを使わない場合）</label>
+    <textarea id="pasteBox" rows="3" placeholder="AIが返したJSONをそのまま貼り付けて、下のボタンを押してください。"></textarea>
+    <div class="btnbar">
+      <button type="button" class="ghost small" id="applyPasteBtn">貼り付けた内容を反映する</button>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 編集 -->
+<section>
+  <div class="sec-head"><span class="step">4</span><h2>中身を確認・修正する</h2></div>
+  <div class="sec-body">
+    <label for="items">検討した項目</label>
+    <textarea id="items" rows="2" placeholder="例）在宅に向けての課題を抽出。"></textarea>
+
+    <label for="content">検討内容</label>
+    <textarea id="content" rows="10" placeholder="話し合った中身を、事実のまま短い文で並べます。"></textarea>
+
+    <label for="conclusion">結論</label>
+    <textarea id="conclusion" rows="3" placeholder="例）今後の在宅復帰にむけて、排泄の課題を解決できるようにする。"></textarea>
+
+    <label for="remaining">残された課題（次回の開催時期）</label>
+    <textarea id="remaining" rows="3" placeholder="次回に持ち越す内容と、次にいつ開くかを書きます。"></textarea>
+  </div>
+</section>
+
+<!-- ⑤ 出力 -->
+<section>
+  <div class="sec-head"><span class="step">5</span><h2>Wordファイルにする</h2></div>
+  <div class="sec-body">
+    <div class="btnbar">
+      <button type="button" id="previewBtn" class="ghost">下書きを表示</button>
+      <button type="button" id="wordBtn">Wordファイルを保存</button>
+    </div>
+    <div id="previewBox" style="display:none; margin-top:12px;">
+      <div class="preview" id="preview"></div>
+    </div>
+    <p class="hint">用紙は横向きです。日付は令和で入ります。Wordで開いたあと、名前を付けて保存でdocx形式にできます。</p>
+  </div>
+
+  <details>
+    <summary>うまく動かないとき</summary>
+    <p>音声が入らない場合、アドレスがhttpsで始まっているか確認してください。ファイルを直接開くとマイクが使えません。</p>
+    <p>パソコンとAndroidはChrome、iPhoneとiPadはSafariで開いてください。アプリの中で開くブラウザでは動かないことがあります。</p>
+    <p>会議は利用者と家族が同席します。録音する前に、記録のために音声を文字にすることを伝えて了解を得てください。</p>
+  </details>
+</section>
+
+<p class="footer-note">介護老人保健施設おおやけの里<br>支え合うすべての人への愛と思いやり</p>
+
+</main>
+
+<script>
+/* ここにGASのURLを書いておくと、毎回入力しなくて済みます */
+const GAS_URL_DEFAULT = "https://script.google.com/macros/s/AKfycbxlzHi8lediPUqqLFwbG_NfHnbAlVK_q1I0m4UZUFNoGAkZGv7aFmZrtzRyj-XWJDnT/exec";
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,"0");
+const wdays = ["日","月","火","水","木","金","土"];
+const MARKER = "──── ここから話題が変わる ────";
+
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function br(s){ return esc(s).replace(/\n/g,"<br>"); }
+
+/* 令和表記 */
+function reiwa(v){
+  if(!v) return "";
+  const d = new Date(v + "T00:00:00");
+  if(isNaN(d)) return "";
+  const y = d.getFullYear() - 2018;
+  return "令和" + (y === 1 ? "元" : y) + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日";
+}
+function reiwaW(v){
+  if(!v) return "";
+  const d = new Date(v + "T00:00:00");
+  if(isNaN(d)) return "";
+  return reiwa(v) + "（" + wdays[d.getDay()] + "）";
+}
+
+(function(){
+  const t = new Date();
+  const s = t.getFullYear() + "-" + pad(t.getMonth()+1) + "-" + pad(t.getDate());
+  $("madeDate").value = s;
+  $("mtDate").value = s;
+  $("gasUrl").value = GAS_URL_DEFAULT;
+})();
+
+/* ========== 出席者 ========== */
+let atts = [
+  {org:"本人", name:""},
+  {org:"", name:""},
+  {org:"", name:""},
+  {org:"", name:""},
+  {org:"", name:""},
+  {org:"", name:""}
+];
+
+function renderAtts(){
+  const wrap = $("attList");
+  wrap.innerHTML = "";
+  atts.forEach((a, i) => {
+    const d = document.createElement("div");
+    d.className = "att";
+    d.innerHTML =
+      '<span>' + (i+1) + '</span>' +
+      '<input type="text" data-k="org" data-i="' + i + '" value="' + esc(a.org) + '" placeholder="所属・職種">' +
+      '<input type="text" data-k="name" data-i="' + i + '" value="' + esc(a.name) + '" placeholder="氏名">' +
+      '<button type="button" data-del="' + i + '">削除</button>';
+    wrap.appendChild(d);
+  });
+  wrap.querySelectorAll("[data-k]").forEach(el => {
+    el.addEventListener("input", e => {
+      atts[Number(e.target.dataset.i)][e.target.dataset.k] = e.target.value;
+    });
+  });
+  wrap.querySelectorAll("[data-del]").forEach(el => {
+    el.addEventListener("click", e => {
+      atts.splice(Number(e.target.dataset.del), 1);
+      renderAtts();
+    });
+  });
+}
+$("addAttBtn").addEventListener("click", () => { atts.push({org:"", name:""}); renderAtts(); });
+renderAtts();
+
+/* ========== 音声認識 ========== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recording = false, timerId = null, startedAt = 0, wakeLock = null;
+
+function setStatus(msg, kind){
+  const el = $("recStatus");
+  el.textContent = msg;
+  el.className = "status" + (kind ? " " + kind : "");
+}
+function updateCount(){ $("charCount").textContent = $("transcript").value.length; }
+$("transcript").addEventListener("input", updateCount);
+
+function appendText(t){
+  const box = $("transcript");
+  const cur = box.value;
+  box.value = cur + (cur && !cur.endsWith("\n") ? "\n" : "") + t;
+  box.scrollTop = box.scrollHeight;
+  updateCount();
+}
+
+function buildRecognizer(){
+  const r = new SR();
+  r.lang = "ja-JP";
+  r.continuous = true;
+  r.interimResults = true;
+  r.maxAlternatives = 1;
+  r.onresult = ev => {
+    let interim = "";
+    for(let i = ev.resultIndex; i < ev.results.length; i++){
+      const res = ev.results[i];
+      const txt = res[0].transcript.trim();
+      if(!txt) continue;
+      if(res.isFinal){
+        const d = new Date();
+        appendText("[" + pad(d.getHours()) + ":" + pad(d.getMinutes()) + "] " + txt);
+      }else{ interim += txt; }
+    }
+    if(interim){
+      $("interimBox").style.display = "block";
+      $("interim").textContent = "認識中：" + interim;
+    }else{
+      $("interimBox").style.display = "none";
+    }
+  };
+  r.onerror = ev => {
+    if(ev.error === "no-speech" || ev.error === "aborted") return;
+    if(ev.error === "not-allowed" || ev.error === "service-not-allowed"){
+      stopRec();
+      setStatus("マイクが使えません。ブラウザの設定でマイクの使用を許可してください。", "err");
+    }else if(ev.error === "network"){
+      setStatus("通信が切れました。つながれば自動で再開します。", "err");
+    }else{
+      setStatus("認識でエラーが出ました（" + ev.error + "）。自動で再開します。", "err");
+    }
+  };
+  r.onend = () => { if(recording){ setTimeout(() => { try{ r.start(); }catch(e){} }, 300); } };
+  return r;
+}
+
+async function startRec(){
+  if(!SR){
+    setStatus("このブラウザは音声認識に対応していません。パソコンとAndroidはChrome、iPhoneとiPadはSafariで開いてください。", "err");
+    return;
+  }
+  rec = buildRecognizer();
+  try{ rec.start(); }catch(e){
+    setStatus("開始できませんでした。ページを読み込み直してください。", "err");
+    return;
+  }
+  recording = true;
+  startedAt = Date.now();
+  $("recBtn").textContent = "録音を止める";
+  $("recBtn").classList.add("on");
+  $("markBtn").disabled = false;
+  setStatus("録音中です。画面を閉じないでください。", "on");
+  timerId = setInterval(() => {
+    const s = Math.floor((Date.now() - startedAt)/1000);
+    $("elapsed").textContent = pad(Math.floor(s/60)) + ":" + pad(s%60);
+  }, 1000);
+  try{ if("wakeLock" in navigator){ wakeLock = await navigator.wakeLock.request("screen"); } }catch(e){}
+}
+
+function stopRec(){
+  recording = false;
+  if(rec){ try{ rec.stop(); }catch(e){} }
+  clearInterval(timerId);
+  $("recBtn").textContent = "録音を始める";
+  $("recBtn").classList.remove("on");
+  $("markBtn").disabled = true;
+  $("interimBox").style.display = "none";
+  setStatus("録音を止めました。文字起こしを見直してから、3に進んでください。");
+  if(wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock = null; }
+}
+
+$("recBtn").addEventListener("click", () => recording ? stopRec() : startRec());
+$("markBtn").addEventListener("click", () => { appendText(MARKER); setStatus("区切りを入れました。", "on"); });
+$("clearBtn").addEventListener("click", () => {
+  if(confirm("文字起こしを全部消します。よろしいですか。")){ $("transcript").value = ""; updateCount(); }
+});
+$("saveTxtBtn").addEventListener("click", () => {
+  const blob = new Blob(["\ufeff" + $("transcript").value], {type:"text/plain;charset=utf-8"});
+  downloadBlob(blob, "文字起こし_" + ($("user").value || "") + "_" + ($("mtDate").value || "") + ".txt");
+});
+
+/* ========== AI ========== */
+function buildPrompt(){
+  return [
+    "あなたは介護老人保健施設の相談員です。以下はサービス担当者会議の文字起こしです。介護保険の第4表「サービス担当者会議の要点」に書く文章を作ってください。",
+    "",
+    "書き方の決まり",
+    "1. 4つの欄に振り分ける。検討した項目、検討内容、結論、残された課題（次回の開催時期）である。",
+    "2. 検討した項目は、その会議で何を話し合ったかを1文か2文で書く。例は「在宅に向けての課題を抽出。」である。",
+    "3. 検討内容は、出た情報と意見を短い文で並べる。服薬、食事、水分、排泄、移動、家族の状況、住まいの環境など、話に出た事実を落とさずに書く。箇条書きの記号は使わず、文を続けて書く。",
+    "4. 結論は、会議で合意した方針を1文から3文で書く。",
+    "5. 残された課題は、決まらなかったことと次に開く時期を書く。話に出ていなければ空文字にする。",
+    "6. 文末は「である調」で短くする。丁寧語は使わない。",
+    "7. 文字起こしにない内容は足さない。数値や日付は文字起こしのとおりに書く。聞き取れていない部分は「（聞き取り不明）」と書く。",
+    "8. 利用者と家族の氏名は文字起こしにある表記のまま使う。",
+    "9. あいさつ、雑談、聞き取り間違いと思われる部分は落とす。",
+    "",
+    "出力は次のJSONだけ。前置きも説明も記号も付けない。",
+    '{"items":"…","content":"…","conclusion":"…","remaining":"…"}',
+    "",
+    "文字起こし",
+    $("transcript").value
+  ].join("\n");
+}
+
+function applyResult(o){
+  if(!o || typeof o !== "object") throw new Error("形式が違います");
+  if(o.items != null) $("items").value = String(o.items);
+  if(o.content != null) $("content").value = String(o.content);
+  if(o.conclusion != null) $("conclusion").value = String(o.conclusion);
+  if(o.remaining != null) $("remaining").value = String(o.remaining);
+}
+
+function parseLoose(text){
+  const s = String(text).replace(/```json/gi, "").replace(/```/g, "").trim();
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if(a < 0 || b < 0) throw new Error("JSONが見つかりません");
+  return JSON.parse(s.slice(a, b+1));
+}
+
+function aiStatus(msg, kind){
+  const el = $("aiStatus");
+  el.style.display = "block";
+  el.textContent = msg;
+  el.className = "status" + (kind ? " " + kind : "");
+}
+
+$("aiBtn").addEventListener("click", async () => {
+  const url = $("gasUrl").value.trim();
+  if(!$("transcript").value.trim()){ aiStatus("文字起こしが空です。", "err"); return; }
+  if(!url){ aiStatus("要約サーバーのアドレスが未設定です。「指示文をコピー」を使ってください。", "err"); return; }
+  $("aiBtn").disabled = true;
+  aiStatus("要約しています。1分ほどかかることがあります。");
+  try{
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({prompt: buildPrompt()})
+    });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || "サーバーが失敗を返しました");
+    applyResult(parseLoose(data.text));
+    aiStatus("要約できました。4で中身を確認してください。", "on");
+  }catch(e){
+    aiStatus("失敗しました（" + e.message + "）。「指示文をコピー」から手作業で進めてください。", "err");
+  }finally{
+    $("aiBtn").disabled = false;
+  }
+});
+
+$("copyPromptBtn").addEventListener("click", async () => {
+  const t = buildPrompt();
+  try{
+    await navigator.clipboard.writeText(t);
+    aiStatus("指示文をコピーしました。AIに貼り付けて、返ってきた文章を下の欄に貼り付けてください。", "on");
+  }catch(e){
+    const w = window.open("", "_blank");
+    if(w){ w.document.write("<pre>" + esc(t) + "</pre>"); }
+    aiStatus("コピーできなかったため別画面に表示しました。手で選んでコピーしてください。", "err");
+  }
+});
+
+$("applyPasteBtn").addEventListener("click", () => {
+  try{
+    applyResult(parseLoose($("pasteBox").value));
+    aiStatus("反映しました。4で中身を確認してください。", "on");
+  }catch(e){
+    aiStatus("読み取れませんでした（" + e.message + "）。JSONの部分だけを貼り付けてください。", "err");
+  }
+});
+
+/* ========== 様式の組み立て ========== */
+function meta(){
+  return {
+    user: $("user").value.trim(),
+    planner: $("planner").value.trim(),
+    made: reiwa($("madeDate").value),
+    date: reiwa($("mtDate").value),
+    place: $("place").value.trim(),
+    start: $("start").value,
+    end: $("end").value,
+    times: $("times").value,
+    mark: $("mark").value.trim(),
+    items: $("items").value.trim(),
+    content: $("content").value.trim(),
+    conclusion: $("conclusion").value.trim(),
+    remaining: $("remaining").value.trim()
+  };
+}
+
+function livingAtts(){
+  return atts.filter(a => (a.org || a.name));
+}
+
+function plainText(){
+  const m = meta();
+  const L = [];
+  L.push(m.mark);
+  L.push("サービス担当者会議の要点");
+  L.push("作成年月日　" + m.made);
+  L.push("利用者名　" + m.user + "　様　　施設サービス計画作成者（担当者）氏名　" + m.planner);
+  L.push("開催日　" + m.date + "　開催場所　" + m.place + "　開催時間　" + m.start + "～" + m.end + "　開催回数　" + m.times + "回");
+  L.push("");
+  L.push("会議出席者");
+  livingAtts().forEach(a => L.push("　" + a.org + "　" + a.name));
+  L.push("");
+  L.push("検討した項目");
+  L.push(m.items);
+  L.push("");
+  L.push("検討内容");
+  L.push(m.content);
+  L.push("");
+  L.push("結論");
+  L.push(m.conclusion);
+  L.push("");
+  L.push("残された課題（次回の開催時期）");
+  L.push(m.remaining);
+  return L.join("\n");
+}
+
+$("previewBtn").addEventListener("click", () => {
+  $("preview").textContent = plainText();
+  $("previewBox").style.display = "block";
+});
+
+const MINCHO = 'font-family:"ＭＳ 明朝","MS Mincho",serif;';
+const GOTHIC = 'font-family:"ＭＳ ゴシック","MS Gothic",sans-serif;';
+
+function attRows(){
+  const list = livingAtts();
+  const rows = Math.max(3, Math.ceil(list.length / 3));
+  let h = "";
+  for(let r = 0; r < rows; r++){
+    h += '<tr>';
+    for(let c = 0; c < 3; c++){
+      const a = list[r*3 + c] || {org:"", name:""};
+      h += '<td style="' + MINCHO + 'font-size:9.5pt;height:20pt;padding:2pt 5pt;">' + esc(a.org) + '</td>';
+      h += '<td style="' + MINCHO + 'font-size:9.5pt;height:20pt;padding:2pt 5pt;">' + esc(a.name) + '</td>';
+    }
+    h += '</tr>';
+  }
+  return {html:h, rows:rows};
+}
+
+function wordHtml(){
+  const m = meta();
+  const a = attRows();
+  const LB = 'align="center" valign="middle" style="' + GOTHIC + 'font-size:9pt;text-align:center;vertical-align:middle;padding:3pt;"';
+  const HB = 'align="center" valign="middle" bgcolor="#F2F2F2" style="' + GOTHIC + 'font-size:9pt;text-align:center;vertical-align:middle;padding:2pt;"';
+  const CELL = h => 'valign="top" style="' + MINCHO + 'font-size:9.5pt;vertical-align:top;padding:4pt 6pt;height:' + h + 'pt;"';
+
+  let body = "";
+  body += '<p align="right" style="' + MINCHO + 'font-size:9.5pt;margin:0 0 2pt 0;">' + esc(m.mark) + '　　作成年月日　' + esc(m.made) + '</p>';
+  body += '<p align="center" style="' + GOTHIC + 'font-size:13.5pt;margin:0 0 7pt 0;"><b>サービス担当者会議の要点</b></p>';
+  body += '<p style="' + MINCHO + 'font-size:10pt;margin:0 0 3pt 0;">利用者名　<u>　' + esc(m.user) + '　</u>　様　　　施設サービス計画作成者（担当者）氏名　<u>　' + esc(m.planner) + '　</u></p>';
+  body += '<p style="' + MINCHO + 'font-size:10pt;margin:0 0 6pt 0;">開催日　<u>　' + esc(m.date) + '　</u>　開催場所　<u>　' + esc(m.place) + '　</u>　開催時間　<u>　' + esc(m.start) + '～' + esc(m.end) + '　</u>　開催回数　<u>　' + esc(m.times) + '　</u>回</p>';
+
+  body += '<table border="1" cellspacing="0" cellpadding="2" width="100%" align="center" style="border-collapse:collapse;table-layout:fixed;">';
+  body += '<colgroup><col width="13%"><col width="17%"><col width="12%"><col width="17%"><col width="12%"><col width="17%"><col width="12%"></colgroup>';
+  body += '<tr><td rowspan="' + (a.rows + 1) + '" ' + LB + '>会議出席者</td>';
+  for(let i = 0; i < 3; i++){
+    body += '<td ' + HB + '>所属（職種）</td><td ' + HB + '>氏名</td>';
+  }
+  body += '</tr>' + a.html;
+  body += '<tr><td ' + LB + '>検討した項目</td><td colspan="6" ' + CELL(30) + '>' + br(m.items) + '</td></tr>';
+  body += '<tr><td ' + LB + '>検討内容</td><td colspan="6" ' + CELL(150) + '>' + br(m.content) + '</td></tr>';
+  body += '<tr><td ' + LB + '>結論</td><td colspan="6" ' + CELL(45) + '>' + br(m.conclusion) + '</td></tr>';
+  body += '<tr><td ' + LB + '>残された課題<br>（次回の開催時期）</td><td colspan="6" ' + CELL(40) + '>' + br(m.remaining) + '</td></tr>';
+  body += '</table>';
+
+  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+    '<head><meta charset="utf-8"><title>サービス担当者会議の要点</title>' +
+    '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->' +
+    '<style>@page{size:A4 landscape; mso-page-orientation:landscape; margin:15mm 15mm 15mm 15mm;} body{' + MINCHO + 'font-size:9.5pt; line-height:1.5;}</style>' +
+    '</head><body>' + body + '</body></html>';
+}
+
+function downloadBlob(blob, name){
+  const url = URL.createObjectURL(blob);
+  const el = document.createElement("a");
+  el.href = url; el.download = name;
+  document.body.appendChild(el); el.click();
+  document.body.removeChild(el);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+$("wordBtn").addEventListener("click", () => {
+  if(!$("content").value.trim() && !confirm("検討内容が空です。このまま出力しますか。")) return;
+  const blob = new Blob(["\ufeff" + wordHtml()], {type:"application/msword;charset=utf-8"});
+  const d = ($("mtDate").value || "").replace(/-/g, "");
+  const u = ($("user").value || "利用者").replace(/[\\\/:*?"<>|　\s]/g, "");
+  downloadBlob(blob, "サービス担当者会議の要点_" + u + "_" + d + ".doc");
+});
+
+window.addEventListener("beforeunload", e => {
+  if(recording || $("transcript").value.length > 50){ e.preventDefault(); e.returnValue = ""; }
+});
+</script>
+</body>
+</html>
